@@ -1,0 +1,48 @@
+# Für Coolify (Build Pack "Docker Compose").
+# HTTPS/Domain übernimmt der Coolify-Proxy: im Coolify-UI beim Service "webhook" die Domain
+# https://<deine-domain>:8000 eintragen (":8000" = interner Port). WAHA bekommt KEINE Domain
+# und keine ports: -> nur im internen Docker-Netz erreichbar.
+# Die ${...}-Variablen erscheinen in Coolify unter "Environment Variables" (Erklärungen: .env.example).
+
+services:
+  webhook:
+    build: ./webhook
+    restart: unless-stopped
+    environment:
+      WEBHOOK_TOKEN: ${WEBHOOK_TOKEN:?}
+      WAHA_API_KEY: ${WAHA_API_KEY:?}
+      WAHA_GROUP_ID: ${WAHA_GROUP_ID}
+      FIELD_WER: ${FIELD_WER:-wer}
+      FIELD_UNTERNEHMEN: ${FIELD_UNTERNEHMEN:-unternehmen}
+      MESSAGE_TEMPLATE: ${MESSAGE_TEMPLATE}
+      MAX_FIELD_LENGTH: ${MAX_FIELD_LENGTH:-100}
+      DEDUP_SECONDS: ${DEDUP_SECONDS:-60}
+    depends_on: [waha]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  waha:
+    # WAHA Core. Auf ARM-Servern (Hetzner CAX) stattdessen devlikeapro/waha:arm verwenden.
+    image: devlikeapro/waha:latest
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Berlin
+      WAHA_API_KEY: ${WAHA_API_KEY:?}
+      WAHA_DASHBOARD_ENABLED: "True"
+      WAHA_DASHBOARD_USERNAME: ${WAHA_DASHBOARD_USERNAME:-admin}
+      WAHA_DASHBOARD_PASSWORD: ${WAHA_DASHBOARD_PASSWORD:?}
+      WHATSAPP_SWAGGER_USERNAME: ${WAHA_DASHBOARD_USERNAME:-admin}
+      WHATSAPP_SWAGGER_PASSWORD: ${WAHA_DASHBOARD_PASSWORD:?}
+      WHATSAPP_DEFAULT_ENGINE: WEBJS
+      # Session beim Start automatisch starten (mit gespeicherter Anmeldung -> kein neuer QR-Scan)
+      WHATSAPP_START_SESSION: default
+      WHATSAPP_RESTART_ALL_SESSIONS: "True"
+    volumes:
+      - waha_sessions:/app/.sessions
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  waha_sessions:
