@@ -23,8 +23,8 @@ services:
       options: { max-size: "10m", max-file: "3" }
 
   waha:
-    # WAHA Core. Auf ARM-Servern (Hetzner CAX) stattdessen devlikeapro/waha:arm verwenden.
-    image: devlikeapro/waha:latest
+    # WAHA Core. Tag "arm" für ARM-Server (Hetzner CAX), "latest" für x86 (CX/CPX).
+    image: devlikeapro/waha:${WAHA_IMAGE_TAG:-arm}
     restart: unless-stopped
     environment:
       TZ: Europe/Berlin
