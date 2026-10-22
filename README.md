@@ -1,7 +1,17 @@
 # Termin-Webhook → WhatsApp-Gruppe (Coolify)
 
 Akquise-Tool → `POST /webhook/termin` → WAHA → WhatsApp-Gruppe:
-„{wer} hat gerade einen Termin mit {unternehmen} gemacht.“
+
+```
+🎉 *NEUER TERMIN!* 🎉
+
+👤 *{wer}* hat gerade einen Termin mit
+🏢 *{unternehmen}* gemacht.
+
+🔥 Stark, weiter so! 💪
+```
+
+Anpassbar über `MESSAGE_TEMPLATE` (`\n` = Zeilenumbruch, `*fett*`, `_kursiv_`).
 
 ```
 Internet ──HTTPS──> Coolify-Proxy ──> webhook ──(internes Docker-Netz)──> waha ──> WhatsApp

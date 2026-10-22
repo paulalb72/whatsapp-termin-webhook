@@ -32,7 +32,16 @@ WAHA_SESSION = env("WAHA_SESSION", "default")
 WAHA_GROUP_ID = env("WAHA_GROUP_ID")
 FIELD_WER = env("FIELD_WER", "wer")
 FIELD_UNTERNEHMEN = env("FIELD_UNTERNEHMEN", "unternehmen")
-MESSAGE_TEMPLATE = env("MESSAGE_TEMPLATE", "{wer} hat gerade einen Termin mit {unternehmen} gemacht.")
+DEFAULT_TEMPLATE = (
+    "🎉 *NEUER TERMIN!* 🎉\n"
+    "\n"
+    "👤 *{wer}* hat gerade einen Termin mit\n"
+    "🏢 *{unternehmen}* gemacht.\n"
+    "\n"
+    "🔥 Stark, weiter so! 💪"
+)
+# "\n" in der Umgebungsvariable wird zum Zeilenumbruch (WhatsApp: *fett*, _kursiv_)
+MESSAGE_TEMPLATE = env("MESSAGE_TEMPLATE", DEFAULT_TEMPLATE).replace("\\n", "\n")
 MAX_FIELD_LENGTH = int(env("MAX_FIELD_LENGTH", "100"))
 DEDUP_SECONDS = int(env("DEDUP_SECONDS", "60"))
 RETRY_DELAYS = (1, 3)  # Wartezeit (s) vor Retry 1 und 2 -> max. 3 Versuche
