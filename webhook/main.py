@@ -36,7 +36,7 @@ DEFAULT_TEMPLATE = (
     "🎉 *NEUER TERMIN!* 🎉\n"
     "\n"
     "👤 *{wer}* hat gerade einen Termin mit\n"
-    "🏢 *{unternehmen}* gemacht.\n"
+    "🏢 *{unternehmen}* gelegt.\n"
     "\n"
     "🔥 Stark, weiter so! 💪"
 )

@@ -6,7 +6,7 @@ Akquise-Tool → `POST /webhook/termin` → WAHA → WhatsApp-Gruppe:
 🎉 *NEUER TERMIN!* 🎉
 
 👤 *{wer}* hat gerade einen Termin mit
-🏢 *{unternehmen}* gemacht.
+🏢 *{unternehmen}* gelegt.
 
 🔥 Stark, weiter so! 💪
 ```
