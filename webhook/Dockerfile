@@ -6,6 +6,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py list_groups.py ./
+# /data = Volume für die Termin-Statistik (SQLite), muss für "nobody" beschreibbar sein
+RUN mkdir /data && chown nobody:nogroup /data
 
 USER nobody
 EXPOSE 8000

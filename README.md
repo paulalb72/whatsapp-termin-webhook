@@ -114,6 +114,30 @@ Logs: in Coolify unter **Logs** → Container `webhook`.
 - **Sonst:** URL `https://termine.[MEINE-DOMAIN]/webhook/termin?token=<WEBHOOK_TOKEN>`
 - **Feldnamen:** Schickt das Tool andere Namen, stehen sie in der 400-Antwort und im Log („empfangene Felder“). Dann `FIELD_WER` / `FIELD_UNTERNEHMEN` in Coolify anpassen und Redeploy klicken.
 
+## Statistik (Tages- und Wochenbilanz)
+
+Jeder erfolgreich gemeldete Termin wird im Volume `webhook_data` (SQLite) gespeichert. Daraus gehen automatisch zwei Ranglisten in die Gruppe. Gezeigt werden nur Personen mit mindestens 1 Termin, ohne Termine wird nichts gesendet.
+
+- **Tagesbilanz:** täglich um `REPORT_TIME` (Default 20:00), Termine seit dem letzten Tagesbericht
+- **Wochenbilanz:** an `WEEKLY_REPORT_DAY` (Default `fri`) um `REPORT_TIME`, Termine der letzten 7 Tage
+
+Gezählt wird nach `wer` (Groß- und Kleinschreibung egal). Der Name muss also immer gleich geschrieben sein.
+
+Zwischenstand abrufen (z. B. zum Testen):
+
+```powershell
+# nur anzeigen
+Invoke-RestMethod -Method Post -Uri "https://whasup.paulalberts.de/report/daily?preview=1" -Headers @{Authorization="Bearer <WEBHOOK_TOKEN>"}
+# in die Gruppe senden (daily oder weekly)
+Invoke-RestMethod -Method Post -Uri "https://whasup.paulalberts.de/report/weekly" -Headers @{Authorization="Bearer <WEBHOOK_TOKEN>"}
+```
+
+Test-Termine wieder entfernen (Coolify → Terminal → Container `webhook`):
+
+```sh
+python -c "import sqlite3; db=sqlite3.connect('/data/termine.db'); print(db.execute(\"DELETE FROM termine WHERE wer LIKE '%Test%'\").rowcount, 'gelöscht'); db.commit()"
+```
+
 ## Hinweise
 
 - Der Webhook-Dienst schreibt keine Tokens ins Log; das uvicorn-Access-Log ist aus. Falls im Coolify-Proxy Access-Logs aktiviert sind, kann dort ein `?token=` auftauchen. Darum lieber den Header verwenden.

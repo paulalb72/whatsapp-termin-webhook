@@ -17,6 +17,11 @@ services:
       MESSAGE_TEMPLATE: ${MESSAGE_TEMPLATE}
       MAX_FIELD_LENGTH: ${MAX_FIELD_LENGTH:-100}
       DEDUP_SECONDS: ${DEDUP_SECONDS:-60}
+      TIMEZONE: ${TIMEZONE:-Europe/Berlin}
+      REPORT_TIME: ${REPORT_TIME:-20:00}
+      WEEKLY_REPORT_DAY: ${WEEKLY_REPORT_DAY:-fri}
+    volumes:
+      - webhook_data:/data
     depends_on: [waha]
     logging:
       driver: json-file
@@ -46,3 +51,4 @@ services:
 
 volumes:
   waha_sessions:
+  webhook_data:
