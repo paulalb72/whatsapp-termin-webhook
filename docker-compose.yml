@@ -43,6 +43,13 @@ services:
       # Session beim Start automatisch starten (mit gespeicherter Anmeldung -> kein neuer QR-Scan)
       WHATSAPP_START_SESSION: default
       WHATSAPP_RESTART_ALL_SESSIONS: "True"
+      # Eingehende Nachrichten an den persönlichen Assistenten melden (leer = kein Webhook)
+      WHATSAPP_HOOK_URL: ${WHATSAPP_HOOK_URL:-}
+      WHATSAPP_HOOK_EVENTS: message
+      WHATSAPP_HOOK_HMAC_KEY: ${WHATSAPP_HOOK_HMAC_KEY:-}
+      WHATSAPP_HOOK_RETRIES_POLICY: exponential
+      WHATSAPP_HOOK_RETRIES_DELAY_SECONDS: "2"
+      WHATSAPP_HOOK_RETRIES_ATTEMPTS: "5"
     volumes:
       - waha_sessions:/app/.sessions
     logging:
