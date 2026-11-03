@@ -133,6 +133,10 @@ Invoke-RestMethod -Method Post -Uri "https://whasup.paulalberts.de/report/daily?
 Invoke-RestMethod -Method Post -Uri "https://whasup.paulalberts.de/report/weekly" -Headers @{Authorization="Bearer <WEBHOOK_TOKEN>"}
 ```
 
+## Geplatzte Termine
+
+`POST /webhook/geplatzt` (Token wie oben), Body `{"wer": "...", "unternehmen": "...", "art": "nicht_erschienen" | "abgesagt"}` schickt eine neutrale Meldung in die Gruppe („Termin mit X (gelegt von Y): Der Lead ist nicht erschienen." bzw. „… hat abgesagt."). Zählt **nicht** in der Statistik. Mit `?preview=1` nur Text anzeigen. Das Akquise-System ruft den Endpoint auf, wenn ein Detailgespräch auf „nicht erschienen" oder „abgesagt ohne Ersatz" gesetzt wird (keine Closing- und Testtermine).
+
 Test-Termine wieder entfernen (Coolify → Terminal → Container `webhook`):
 
 ```sh
