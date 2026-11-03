@@ -50,9 +50,9 @@ GITHUB_TOKEN = env("GITHUB_TOKEN")
 GITHUB_REPO = env("GITHUB_REPO", "paulalb72/whatsapp-termin-webhook")
 GITHUB_BRANCH = env("GITHUB_BRANCH", "main")
 GITHUB_API_URL = env("GITHUB_API_URL", "https://api.github.com")
-COOLIFY_URL = env("COOLIFY_URL").rstrip("/")
-COOLIFY_TOKEN = env("COOLIFY_TOKEN")
-COOLIFY_APP_UUID = env("COOLIFY_APP_UUID")
+BOT_COOLIFY_URL = env("BOT_COOLIFY_URL").rstrip("/")
+BOT_COOLIFY_TOKEN = env("BOT_COOLIFY_TOKEN")
+BOT_COOLIFY_UUID = env("BOT_COOLIFY_UUID")
 BOT_URL = env("BOT_URL").rstrip("/")
 BOT_TOKEN = env("BOT_TOKEN")
 DATA_DIR = env("DATA_DIR", "/data")
@@ -86,11 +86,13 @@ def check_config() -> None:
         errors.append("PUBLIC_URL ohne /mcp am Ende angeben")
     if len(CONNECTOR_PASSWORD) < 12:
         errors.append("CONNECTOR_PASSWORD fehlt oder ist kürzer als 12 Zeichen")
-    for name in ("GITHUB_TOKEN", "COOLIFY_URL", "COOLIFY_TOKEN", "COOLIFY_APP_UUID", "BOT_URL", "BOT_TOKEN"):
+    for name in ("GITHUB_TOKEN", "BOT_COOLIFY_URL", "BOT_COOLIFY_TOKEN", "BOT_COOLIFY_UUID", "BOT_URL", "BOT_TOKEN"):
         if not globals()[name]:
             errors.append(f"{name} fehlt")
     if "/" not in GITHUB_REPO:
         errors.append(f"GITHUB_REPO muss die Form besitzer/repo haben: {GITHUB_REPO!r}")
+    if BOT_COOLIFY_URL and BOT_COOLIFY_URL in (PUBLIC_URL, BOT_URL):
+        errors.append("BOT_COOLIFY_URL muss die Adresse der Coolify-Oberfläche sein, nicht die des Connectors oder Bots")
     try:
         ZoneInfo(TIMEZONE)
     except Exception:
@@ -103,10 +105,10 @@ def check_config() -> None:
 
 check_config()
 TZ = ZoneInfo(TIMEZONE)
-KNOWN_SECRETS = [s for s in (CONNECTOR_PASSWORD, GITHUB_TOKEN, COOLIFY_TOKEN, BOT_TOKEN) if len(s) >= 8]
+KNOWN_SECRETS = [s for s in (CONNECTOR_PASSWORD, GITHUB_TOKEN, BOT_COOLIFY_TOKEN, BOT_TOKEN) if len(s) >= 8]
 
 github = GitHub(GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, GITHUB_API_URL)
-coolify = Coolify(COOLIFY_URL, COOLIFY_TOKEN, COOLIFY_APP_UUID)
+coolify = Coolify(BOT_COOLIFY_URL, BOT_COOLIFY_TOKEN, BOT_COOLIFY_UUID)
 bot = Bot(BOT_URL, BOT_TOKEN)
 last_deployment: str | None = None
 

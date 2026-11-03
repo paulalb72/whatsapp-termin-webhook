@@ -144,7 +144,7 @@ class Coolify:
             return await _request(self.http, "Coolify", method, path, **kwargs)
         except UpstreamError as e:
             if e.status == 401:
-                raise ToolError("Coolify: Token ungültig (COOLIFY_TOKEN des Connectors prüfen).") from e
+                raise ToolError("Coolify: Token ungültig (BOT_COOLIFY_TOKEN des Connectors prüfen).") from e
             if e.status == 403:
                 raise ToolError(
                     "Coolify: Zugriff verweigert. Ist die API in Coolify aktiviert (Settings → Advanced → API Access) "

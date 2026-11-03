@@ -13,9 +13,9 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:?}
       GITHUB_REPO: ${GITHUB_REPO:-paulalb72/whatsapp-termin-webhook}
       GITHUB_BRANCH: ${GITHUB_BRANCH:-main}
-      COOLIFY_URL: ${COOLIFY_URL:?}
-      COOLIFY_TOKEN: ${COOLIFY_TOKEN:?}
-      COOLIFY_APP_UUID: ${COOLIFY_APP_UUID:?}
+      BOT_COOLIFY_URL: ${BOT_COOLIFY_URL:?}
+      BOT_COOLIFY_TOKEN: ${BOT_COOLIFY_TOKEN:?}
+      BOT_COOLIFY_UUID: ${BOT_COOLIFY_UUID:?}
       BOT_URL: ${BOT_URL:?}
       BOT_TOKEN: ${BOT_TOKEN:?}
       TIMEZONE: ${TIMEZONE:-Europe/Berlin}

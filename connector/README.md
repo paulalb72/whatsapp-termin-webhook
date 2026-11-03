@@ -75,9 +75,9 @@ Der Ordner `connector/` muss auf GitHub liegen (`git push`), weil Coolify direkt
    | `PUBLIC_URL` | `https://connector.paulalberts.de` (ohne `/mcp`, ohne `/` am Ende) |
    | `CONNECTOR_PASSWORD` | neues Passwort, z. B. `openssl rand -hex 16` |
    | `GITHUB_TOKEN` | Token aus A1 |
-   | `COOLIFY_URL` | Adresse, unter der du Coolify im Browser öffnest, z. B. `https://coolify.paulalberts.de` |
-   | `COOLIFY_TOKEN` | Token aus A2 |
-   | `COOLIFY_APP_UUID` | UUID aus A2 |
+   | `BOT_COOLIFY_URL` | Adresse, unter der du Coolify im Browser öffnest, z. B. `https://coolify.paulalberts.de` |
+   | `BOT_COOLIFY_TOKEN` | Token aus A2 |
+   | `BOT_COOLIFY_UUID` | UUID aus A2 |
    | `BOT_URL` | `https://whasup.paulalberts.de` |
    | `BOT_TOKEN` | derselbe Wert wie `WEBHOOK_TOKEN` beim Bot |
 
@@ -208,7 +208,7 @@ Ein Deploy des Bots berührt den Connector nicht.
 | Login: „Zu viele Fehlversuche“ | 15 Minuten warten oder die Connector-Ressource neu starten. |
 | Nach einem Passwortwechsel kommt „nicht autorisiert“ | In Claude beim Connector **Trennen → Verbinden** und mit dem neuen Passwort anmelden. |
 | `Coolify: Zugriff verweigert` | API Access in Coolify aktiv? Token-Rechte `read`, `read:sensitive`, `write`, `deploy`? Allowed IPs? |
-| `Coolify nicht erreichbar` | `COOLIFY_URL` muss vom Server aus erreichbar sein. Die normale Coolify-Domain funktioniert in der Regel. |
+| `Coolify nicht erreichbar` | `BOT_COOLIFY_URL` muss vom Server aus erreichbar sein. Die normale Coolify-Domain funktioniert in der Regel. |
 | `logs` zeigt den falschen Container | Ältere Coolify-Versionen kennen den Parameter `service_name` nicht. Coolify aktualisieren oder die Logs in der Coolify-Oberfläche ansehen. |
 | Deploy `failed` | `deploy_status` zeigt das Ende des Build-Logs. Der vorherige Stand läuft weiter. Fehler beheben oder `aenderung_zuruecknehmen` und erneut `deployen`. |
 | Bot startet nach dem Deploy nicht | `logs` (Dienst `webhook`) zeigt den Fehler, z. B. `Konfigurationsfehler: …`. Korrigieren oder zurücknehmen und erneut deployen. |
