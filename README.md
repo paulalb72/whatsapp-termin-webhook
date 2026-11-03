@@ -23,6 +23,7 @@ Internet ──HTTPS──> Coolify-Proxy ──> webhook ──(internes Docker
 | `webhook/list_groups.py` | Listet Gruppen mit Name und ID |
 | `docker-compose.yml` | webhook + waha, für Coolify |
 | `.env.example` | Alle Variablen, kommentiert |
+| `connector/` | Bot-Connector: den Bot über Claude ändern, deployen und testen ([Anleitung](connector/README.md)) |
 
 Antworten des Webhooks: `200 {"status":"sent"}`, `200 {"status":"duplicate"}`, `400` (Feld fehlt / kein JSON), `401` (Token), `502` (WAHA nach 3 Versuchen nicht erfolgreich), `503` (`WAHA_GROUP_ID` nicht gesetzt).
 
@@ -143,4 +144,5 @@ python -c "import sqlite3; db=sqlite3.connect('/data/termine.db'); print(db.exec
 - Der Webhook-Dienst schreibt keine Tokens ins Log; das uvicorn-Access-Log ist aus. Falls im Coolify-Proxy Access-Logs aktiviert sind, kann dort ein `?token=` auftauchen. Darum lieber den Header verwenden.
 - Der Duplikat-Schutz liegt im Arbeitsspeicher und wird bei Neustart/Redeploy geleert.
 - WAHA nutzt WhatsApp Web, also keine offizielle API. Für wenige Nachrichten in eine eigene Gruppe ist das unkritisch, für Massenversand nicht geeignet.
-- Code-Änderungen: pushen → Redeploy in Coolify (oder Auto-Deploy über die GitHub App).
+- Code-Änderungen: pushen → Redeploy in Coolify (oder Auto-Deploy über die GitHub App). Alternativ über den
+  [Bot-Connector](connector/README.md) direkt aus Claude. Der committet auf `main`, darum lokal vorher `git pull`.

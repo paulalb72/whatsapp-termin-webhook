@@ -1,0 +1,29 @@
+# Bot-Connector als EIGENE Coolify-Ressource (nicht im Stack des Bots, damit er auch dann läuft,
+# wenn ein Deploy den Bot kaputtmacht). Coolify: Base Directory "/connector",
+# Docker Compose Location "/docker-compose.yml". Domain beim Service "connector": https://<domain>:8000
+# Erklärungen zu den Variablen: .env.example in diesem Ordner, Anleitung: README.md
+
+services:
+  connector:
+    build: .
+    restart: unless-stopped
+    environment:
+      PUBLIC_URL: ${PUBLIC_URL:?}
+      CONNECTOR_PASSWORD: ${CONNECTOR_PASSWORD:?}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:?}
+      GITHUB_REPO: ${GITHUB_REPO:-paulalb72/whatsapp-termin-webhook}
+      GITHUB_BRANCH: ${GITHUB_BRANCH:-main}
+      COOLIFY_URL: ${COOLIFY_URL:?}
+      COOLIFY_TOKEN: ${COOLIFY_TOKEN:?}
+      COOLIFY_APP_UUID: ${COOLIFY_APP_UUID:?}
+      BOT_URL: ${BOT_URL:?}
+      BOT_TOKEN: ${BOT_TOKEN:?}
+      TIMEZONE: ${TIMEZONE:-Europe/Berlin}
+    volumes:
+      - connector_data:/data
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  connector_data:
