@@ -26,6 +26,9 @@ Claude ──HTTPS + OAuth──> Connector ──┬──> GitHub-API   (Code:
 | `docker-compose.yml` | Für Coolify (eigene Ressource) |
 | `.env.example` | Alle Variablen, kommentiert |
 
+**Aktuelle Einrichtung:** Coolify-Projekt „wasup“, Ressource `whatsapp-bot-connector`
+(UUID `qfabo2tos58w7brezzvqhtr6`), Connector-URL für Claude: `https://bot-connector.46.224.186.65.sslip.io/mcp`
+
 ---
 
 ## Teil A: Einrichtung (Paul, einmalig, ca. 20 Minuten)
@@ -55,8 +58,10 @@ Claude ──HTTPS + OAuth──> Connector ──┬──> GitHub-API   (Code:
 
 ### A3. Domain
 
-A-Record, z. B. `connector.paulalberts.de` → IP des Servers. Entfällt, wenn ein Wildcard-Record auf den
-Server zeigt.
+Ohne DNS-Eintrag geht eine sslip.io-Adresse, die automatisch auf die Server-IP zeigt (so eingerichtet):
+`bot-connector.46.224.186.65.sslip.io`. Eigene Domain stattdessen: A-Record, z. B.
+`connector.paulalberts.de` → `46.224.186.65`, dann Domain und `PUBLIC_URL` umstellen und Redeploy.
+Wer schon verbunden ist, muss den Connector danach in Claude mit der neuen URL neu hinzufügen.
 
 ### A4. Code pushen
 
@@ -72,7 +77,7 @@ Der Ordner `connector/` muss auf GitHub liegen (`git push`), weil Coolify direkt
 
    | Variable | Wert |
    |---|---|
-   | `PUBLIC_URL` | `https://connector.paulalberts.de` (ohne `/mcp`, ohne `/` am Ende) |
+   | `PUBLIC_URL` | `https://bot-connector.46.224.186.65.sslip.io` (ohne `/mcp`, ohne `/` am Ende) |
    | `CONNECTOR_PASSWORD` | neues Passwort, z. B. `openssl rand -hex 16` |
    | `GITHUB_TOKEN` | Token aus A1 |
    | `BOT_COOLIFY_URL` | Adresse, unter der du Coolify im Browser öffnest, z. B. `https://coolify.paulalberts.de` |
@@ -82,19 +87,19 @@ Der Ordner `connector/` muss auf GitHub liegen (`git push`), weil Coolify direkt
    | `BOT_TOKEN` | derselbe Wert wie `WEBHOOK_TOKEN` beim Bot |
 
    `GITHUB_REPO`, `GITHUB_BRANCH` und `TIMEZONE` haben passende Defaults.
-3. **Domains** (Configuration → Services): beim Service `connector` `https://connector.paulalberts.de:8000`
+3. **Domains** (Configuration → Services): beim Service `connector` `https://bot-connector.46.224.186.65.sslip.io:8000`
    eintragen. `:8000` ist der interne Port und wird nicht öffentlich geöffnet.
 4. **Deploy** und prüfen:
    ```bash
-   curl https://connector.paulalberts.de/health   # -> {"status":"ok"}
+   curl https://bot-connector.46.224.186.65.sslip.io/health   # -> {"status":"ok"}
    ```
-   In den Logs der Ressource steht `Connector bereit: https://connector.paulalberts.de/mcp`.
+   In den Logs der Ressource steht `Connector bereit: https://bot-connector.46.224.186.65.sslip.io/mcp`.
    Bei einem Konfigurationsfehler beendet sich der Container und nennt im Log die fehlende Variable.
 
 ### A6. Zugang weitergeben
 
 Dem Kollegen geben:
-- **Connector-URL:** `https://connector.paulalberts.de/mcp`
+- **Connector-URL:** `https://bot-connector.46.224.186.65.sslip.io/mcp`
 - **Passwort:** `CONNECTOR_PASSWORD`, am besten über einen anderen Kanal als die URL
 
 ---
@@ -106,7 +111,7 @@ Dem Kollegen geben:
 1. **Einstellungen → Connectors → Benutzerdefinierten Connector hinzufügen** (engl. *Add custom connector*).
    Im Team- oder Enterprise-Plan darf das nur ein Owner. Dann fügt Paul ihn unter
    *Organisationseinstellungen → Connectors* hinzu, und du klickst danach nur noch auf **Verbinden**.
-2. **Name:** `WhatsApp-Bot` · **URL:** `https://connector.paulalberts.de/mcp`.
+2. **Name:** `WhatsApp-Bot` · **URL:** `https://bot-connector.46.224.186.65.sslip.io/mcp`.
    Die erweiterten Einstellungen (OAuth Client ID/Secret) bleiben leer.
 3. **Hinzufügen → Verbinden.** Es öffnet sich die Login-Seite des Connectors:
    deinen **Namen** und das **Connector-Passwort** eingeben → **Zugriff erlauben**.
@@ -120,7 +125,7 @@ Auf dem Handy (Claude-App) ist der Connector danach ebenfalls verfügbar.
 ### Alternativ in Claude Code
 
 ```bash
-claude mcp add --transport http whatsapp-bot https://connector.paulalberts.de/mcp
+claude mcp add --transport http whatsapp-bot https://bot-connector.46.224.186.65.sslip.io/mcp
 ```
 
 Dann in Claude Code `/mcp` → `whatsapp-bot` → **Authenticate**. Im Browser öffnet sich dieselbe

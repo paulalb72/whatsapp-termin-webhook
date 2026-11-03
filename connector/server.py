@@ -331,11 +331,17 @@ async def commit_change(beschreibung: str, make: Callable[[dict[str, dict]], Awa
     raise ToolError("Das Repo wurde gerade gleichzeitig geändert. Bitte noch einmal versuchen.")
 
 
-async def compose_variables(files: dict[str, dict]) -> set[str] | None:
-    entry = files.get("docker-compose.yml")
-    if not entry:
+async def compose_variables() -> set[str] | None:
+    """Variablen, die docker-compose.yml verwendet. None, wenn die Datei gerade nicht lesbar ist."""
+    try:
+        _, files = await head_files()
+        entry = files.get("docker-compose.yml")
+        if not entry:
+            return None
+        text = await github.text(entry["sha"]) or ""
+    except ToolError as e:
+        log.warning("docker-compose.yml nicht lesbar: %s", e)
         return None
-    text = await github.text(entry["sha"]) or ""
     return set(re.findall(r"\$\{([A-Za-z_][A-Za-z0-9_]*)", text))
 
 
@@ -796,8 +802,8 @@ async def logs(
 async def variablen_liste() -> str:
     """Umgebungsvariablen des Bots in Coolify (Einstellungen wie MESSAGE_TEMPLATE, REPORT_TIME). Geheime Werte werden
     maskiert. Zeigt auch, welche Variablen docker-compose.yml verwendet."""
-    envs, (_, files) = await asyncio.gather(coolify.envs(), head_files())
-    used = await compose_variables(files) or set()
+    envs, compose_vars = await asyncio.gather(coolify.envs(), compose_variables())
+    used = compose_vars or set()
     lines = []
     keys = set()
     for e in sorted(envs, key=lambda e: e.get("key", "")):
@@ -819,6 +825,8 @@ async def variablen_liste() -> str:
     missing = sorted(used - keys)
     if missing:
         lines += ["", "In docker-compose.yml verwendet, in Coolify nicht gesetzt (Default greift): " + ", ".join(missing)]
+    if compose_vars is None:
+        lines += ["", "(docker-compose.yml gerade nicht lesbar, Abgleich übersprungen)"]
     lines += ["", "Änderungen an Variablen werden erst mit dem nächsten deployen wirksam."]
     return "\n".join(lines)
 
@@ -837,7 +845,7 @@ async def variable_setzen(
         raise ToolError(f"{key} ist geschützt und kann nur in Coolify direkt geändert werden.")
     if any(secret in wert for secret in KNOWN_SECRETS):
         raise ToolError("Abgelehnt: Der Wert enthält einen Token oder ein Passwort des Connectors.")
-    envs, (_, files) = await asyncio.gather(coolify.envs(), head_files())
+    envs, used = await asyncio.gather(coolify.envs(), compose_variables())
     exists = any(e.get("key") == key for e in envs)
     if exists:
         await coolify.update_env(key, wert)
@@ -845,7 +853,6 @@ async def variable_setzen(
         await coolify.create_env(key, wert)
     log.info("Variable %s %s von %s", key, "geändert" if exists else "angelegt", user())
     lines = [f"✓ {key} {'geändert' if exists else 'angelegt'}. Wirksam nach dem nächsten deployen."]
-    used = await compose_variables(files)
     if used is not None and key not in used:
         lines.append(
             f"⚠ {key} steht noch nicht in docker-compose.yml. Dort unter services.webhook.environment ergänzen "
