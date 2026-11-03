@@ -312,6 +312,49 @@ async def termin(request: Request):
     return error(502, "WhatsApp-Nachricht konnte nicht gesendet werden.")
 
 
+GEPLATZT_TEXTE = {
+    "nicht_erschienen": "📅 *Termin-Update*\n\nTermin mit *{unternehmen}* (gelegt von {wer}): Der Lead ist nicht erschienen.",
+    "abgesagt": "📅 *Termin-Update*\n\nTermin mit *{unternehmen}* (gelegt von {wer}): Der Lead hat abgesagt.",
+}
+
+
+@app.post("/webhook/geplatzt")
+async def geplatzt(request: Request):
+    """Neutrale Meldung, wenn ein Termin geplatzt ist (nicht erschienen / abgesagt). Zählt nicht in der Statistik."""
+    if not token_ok(request):
+        return error(401, "Ungültiger oder fehlender Token.")
+    try:
+        data = await request.json()
+    except Exception:
+        return error(400, "Body ist kein gültiges JSON.")
+    if not isinstance(data, dict):
+        return error(400, "JSON-Body muss ein Objekt sein.")
+
+    wer = clean(data.get(FIELD_WER))
+    unternehmen = clean(data.get(FIELD_UNTERNEHMEN))
+    art = clean(data.get("art"))
+    if not wer or not unternehmen:
+        return error(400, "Feld(er) wer und unternehmen dürfen nicht leer sein.", received_fields=list(data))
+    if art not in GEPLATZT_TEXTE:
+        return error(400, f"Feld art muss {' oder '.join(GEPLATZT_TEXTE)} sein.")
+
+    text = GEPLATZT_TEXTE[art].format(wer=wer, unternehmen=unternehmen)
+    if request.query_params.get("preview"):
+        return {"status": "preview", "text": text}
+    if not WAHA_GROUP_ID:
+        return error(503, "WhatsApp-Gruppe ist nicht konfiguriert.")
+
+    key = ("geplatzt:" + art, unternehmen.casefold())
+    if not claim(key):
+        return {"status": "duplicate"}
+    if await send_whatsapp(text):
+        log.info("Geplatzt gesendet (%s): %s / %s", art, wer, unternehmen)
+        return {"status": "sent"}
+    _recent.pop(key, None)
+    log.error("502 – Geplatzt-Meldung fehlgeschlagen: %s / %s", wer, unternehmen)
+    return error(502, "WhatsApp-Nachricht konnte nicht gesendet werden.")
+
+
 @app.post("/report/{kind}")
 async def report_now(kind: str, request: Request):
     """Zwischenstand seit dem letzten planmäßigen Report senden (?preview=1: nur anzeigen)."""
