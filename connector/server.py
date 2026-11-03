@@ -802,7 +802,9 @@ async def variablen_liste() -> str:
         key = e.get("key", "")
         keys.add(key)
         value = e.get("value")
-        if key in PROTECTED_VARS or SECRET_NAME.search(key):
+        if "value" not in e:
+            shown = "(Wert verborgen: Coolify-Token ohne read:sensitive)"
+        elif key in PROTECTED_VARS or SECRET_NAME.search(key):
             shown = "•••• (gesetzt)" if value else "(leer)"
         else:
             shown = mask(str(value if value is not None else ""))[:300] or "(leer)"
