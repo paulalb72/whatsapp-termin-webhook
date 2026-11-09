@@ -339,6 +339,9 @@ async def geplatzt(request: Request):
         return error(400, f"Feld art muss {' oder '.join(GEPLATZT_TEXTE)} sein.")
 
     text = GEPLATZT_TEXTE[art].format(wer=wer, unternehmen=unternehmen)
+    grund = clean(data.get("grund"))
+    if grund:
+        text += f"\n\n📝 Grund: {grund[:500]}"
     if request.query_params.get("preview"):
         return {"status": "preview", "text": text}
     if not WAHA_GROUP_ID:
