@@ -315,6 +315,7 @@ async def termin(request: Request):
 GEPLATZT_TEXTE = {
     "nicht_erschienen": "📅 *Termin-Update*\n\nTermin mit *{unternehmen}* (gelegt von {wer}): Der Lead ist nicht erschienen.",
     "abgesagt": "📅 *Termin-Update*\n\nTermin mit *{unternehmen}* (gelegt von {wer}): Der Lead hat abgesagt.",
+    "abgesagt_rueckruf": "📅 *Termin-Update*\n\nTermin mit *{unternehmen}* (gelegt von {wer}): Der Lead hat abgesagt. {wer} ruft zurück, um neu zu buchen.",
 }
 
 
