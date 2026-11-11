@@ -135,7 +135,7 @@ Invoke-RestMethod -Method Post -Uri "https://whasup.paulalberts.de/report/weekly
 
 ## Geplatzte Termine
 
-`POST /webhook/geplatzt` (Token wie oben), Body `{"wer": "...", "unternehmen": "...", "art": "nicht_erschienen" | "abgesagt" | "abgesagt_rueckruf", "grund": "..."}` schickt eine neutrale Meldung in die Gruppe („Termin mit X (gelegt von Y): Der Lead ist nicht erschienen." bzw. „… hat abgesagt."). Optional `grund` (bis 500 Zeichen) wird als Zeile „📝 Grund: …" angehängt — das Akquise-System schickt dort den Hinweis mit, der beim Setzen des Status eingetragen wurde. Zählt **nicht** in der Statistik. Mit `?preview=1` nur Text anzeigen. Das Akquise-System ruft den Endpoint auf, wenn ein Detailgespräch auf „nicht erschienen" oder „abgesagt ohne Ersatz" gesetzt wird (keine Closing- und Testtermine).
+`POST /webhook/geplatzt` (Token wie oben), Body `{"wer": "...", "unternehmen": "...", "art": "nicht_erschienen" | "abgesagt" | "abgesagt_rueckruf", "grund": "..."}` schickt eine neutrale Meldung in die Gruppe („Termin mit X (gelegt von Y): Der Lead ist nicht erschienen." bzw. „… hat abgesagt."). Optional `grund` (bis 500 Zeichen) wird als Zeile „📝 Grund: …" angehängt — das Akquise-System schickt dort den Hinweis mit, der beim Setzen des Status eingetragen wurde. Zählt **nicht** in der Statistik. Mit `?preview=1` nur Text anzeigen. Das Akquise-System ruft den Endpoint auf, wenn ein Detailgespräch auf „nicht erschienen" oder „abgesagt ohne Ersatz" gesetzt wird (keine Closing- und Testtermine). Seit 11.11.2026 zusätzlich mit `art = abgesagt_rueckruf`, sobald der Lead selbst absagt und der Rückruf des Anrufers offen ist („… hat abgesagt. Y ruft zurück, um neu zu buchen.").
 
 Test-Termine wieder entfernen (Coolify → Terminal → Container `webhook`):
 
