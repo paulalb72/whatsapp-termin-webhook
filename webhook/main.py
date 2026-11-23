@@ -33,6 +33,10 @@ WAHA_URL = env("WAHA_URL", "http://waha:3000").rstrip("/")
 WAHA_API_KEY = env("WAHA_API_KEY")
 WAHA_SESSION = env("WAHA_SESSION", "default")
 WAHA_GROUP_ID = env("WAHA_GROUP_ID")
+# Freier Versand über POST /send für andere Dienste (z. B. Trading-Signale): eigener Token, eigene Gruppe
+SEND_TOKEN = env("SEND_TOKEN")
+SEND_GROUP_ID = env("SEND_GROUP_ID")
+SEND_MAX_LENGTH = 4000
 FIELD_WER = env("FIELD_WER", "wer")
 FIELD_UNTERNEHMEN = env("FIELD_UNTERNEHMEN", "unternehmen")
 DEFAULT_TEMPLATE = (
@@ -72,6 +76,8 @@ def check_config() -> None:
         errors.append("WEBHOOK_TOKEN fehlt oder ist kürzer als 16 Zeichen")
     if not WAHA_API_KEY:
         errors.append("WAHA_API_KEY fehlt")
+    if SEND_TOKEN and len(SEND_TOKEN) < 16:
+        errors.append("SEND_TOKEN ist kürzer als 16 Zeichen")
     try:
         MESSAGE_TEMPLATE.format(wer="", unternehmen="")
     except (KeyError, IndexError, ValueError) as e:
@@ -158,8 +164,8 @@ def claim(key: tuple[str, str]) -> bool:
     return True
 
 
-async def send_whatsapp(text: str) -> bool:
-    payload = {"session": WAHA_SESSION, "chatId": WAHA_GROUP_ID, "text": text}
+async def send_whatsapp(text: str, chat_id: str | None = None) -> bool:
+    payload = {"session": WAHA_SESSION, "chatId": chat_id or WAHA_GROUP_ID, "text": text}
     attempts = len(RETRY_DELAYS) + 1
     for attempt in range(1, attempts + 1):
         try:
@@ -357,6 +363,35 @@ async def geplatzt(request: Request):
         return {"status": "sent"}
     _recent.pop(key, None)
     log.error("502 – Geplatzt-Meldung fehlgeschlagen: %s / %s", wer, unternehmen)
+    return error(502, "WhatsApp-Nachricht konnte nicht gesendet werden.")
+
+
+@app.post("/send")
+async def send(request: Request):
+    """Freier Text in die SEND-Gruppe (für andere Dienste, z. B. Trading-Signale). Nur Header-Token."""
+    if not SEND_TOKEN:
+        return error(503, "POST /send ist nicht eingerichtet (SEND_TOKEN fehlt).")
+    auth = request.headers.get("authorization", "")
+    given = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    if not secrets.compare_digest(given.encode(), SEND_TOKEN.encode()):
+        ip = request.client.host if request.client else "?"
+        log.warning("/send 401 – ungültiger oder fehlender Token (von %s)", ip)
+        return error(401, "Ungültiger oder fehlender Token.")
+    try:
+        data = await request.json()
+    except Exception:
+        return error(400, "Body ist kein gültiges JSON.")
+    text = data.get("text") if isinstance(data, dict) else None
+    if not isinstance(text, str) or not text.strip():
+        return error(400, "Feld text fehlt oder ist leer.")
+    if len(text) > SEND_MAX_LENGTH:
+        return error(400, f"Text ist länger als {SEND_MAX_LENGTH} Zeichen.")
+    if not SEND_GROUP_ID:
+        return error(503, "SEND_GROUP_ID ist nicht konfiguriert.")
+    if await send_whatsapp(text.strip(), chat_id=SEND_GROUP_ID):
+        log.info("/send: Nachricht gesendet (%d Zeichen)", len(text))
+        return {"status": "sent"}
+    log.error("/send 502 – Senden endgültig fehlgeschlagen")
     return error(502, "WhatsApp-Nachricht konnte nicht gesendet werden.")
 
 

@@ -143,6 +143,21 @@ Test-Termine wieder entfernen (Coolify → Terminal → Container `webhook`):
 python -c "import sqlite3; db=sqlite3.connect('/data/termine.db'); print(db.execute(\"DELETE FROM termine WHERE wer LIKE '%Test%'\").rowcount, 'gelöscht'); db.commit()"
 ```
 
+## Freier Versand für andere Dienste (`POST /send`)
+
+Andere Dienste (zurzeit das Cockpit „Mildenstein & Alberts Invest“ für Trading-Signale) schicken über
+`POST /send` beliebigen Text in eine **eigene** Gruppe. Termin-Gruppe und Statistik bleiben davon unberührt.
+
+- **Auth:** nur Header `Authorization: Bearer <SEND_TOKEN>` (eigener Token, nicht `WEBHOOK_TOKEN`)
+- **Body:** `{"text": "..."}`, höchstens 4000 Zeichen, WhatsApp-Formatierung erlaubt
+- **Ziel:** `SEND_GROUP_ID` (Gruppen-ID per `list_groups.py`, die Bot-Nummer muss Mitglied sein)
+- **Antworten:** `200 {"status":"sent"}`, `400` (kein Text / zu lang), `401` (Token), `502` (WAHA), `503` (`SEND_TOKEN` oder `SEND_GROUP_ID` fehlt)
+
+```bash
+curl -i -X POST https://whasup.paulalberts.de/send -H "Authorization: Bearer <SEND_TOKEN>" \
+  -H "Content-Type: application/json" -d '{"text":"Test aus /send"}'
+```
+
 ## Hinweise
 
 - Der Webhook-Dienst schreibt keine Tokens ins Log; das uvicorn-Access-Log ist aus. Falls im Coolify-Proxy Access-Logs aktiviert sind, kann dort ein `?token=` auftauchen. Darum lieber den Header verwenden.

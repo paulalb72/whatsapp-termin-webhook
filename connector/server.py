@@ -61,7 +61,7 @@ TIMEZONE = env("TIMEZONE", "Europe/Berlin")
 # Der Connector darf sich nicht selbst kaputtmachen: connector/ ist über die Tools nur lesbar.
 PROTECTED_PATHS = ("connector/", ".github/")
 # Diese Variablen hängen am Akquise-Tool, an WAHA oder am Connector selbst und bleiben Paul vorbehalten.
-PROTECTED_VARS = {"WEBHOOK_TOKEN", "WAHA_API_KEY", "WAHA_DASHBOARD_PASSWORD", "WHATSAPP_HOOK_HMAC_KEY"}
+PROTECTED_VARS = {"WEBHOOK_TOKEN", "WAHA_API_KEY", "WAHA_DASHBOARD_PASSWORD", "WHATSAPP_HOOK_HMAC_KEY", "SEND_TOKEN"}
 SECRET_NAME = re.compile(r"TOKEN|KEY|SECRET|PASSWORD|PASSWD|HMAC|CREDENTIAL", re.I)
 SECRET_PATTERNS = [
     (re.compile(r"ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}"), "GitHub-Token"),
